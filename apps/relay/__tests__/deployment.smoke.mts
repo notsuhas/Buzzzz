@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { setTimeout as delay } from "node:timers/promises";
 import { WebSocket } from "ws";
 import { isRecord } from "@buzzzz/core";
 
@@ -44,16 +45,28 @@ function connect(url: unknown, role: "host" | "phone"): Promise<WebSocket> {
 }
 
 assert.equal((await json(await request("/health"))).ok, true);
-const page = await request("/");
-assert.equal(page.status, 200);
-const html = await page.text();
-assert.ok(html.includes("Buzzzz · Haptics studio"), "Studio HTML was not served");
-const script = html.match(/<script[^>]*src="([^"]+)"/u)?.[1];
-assert.ok(
-  typeof script === "string" && script.startsWith("/assets/"),
-  "Missing production JavaScript entry",
-);
-assert.match((await request(script)).headers.get("Content-Type") ?? "", /javascript/u);
+async function verifyStudioAssets() {
+  const page = await request("/", { cache: "no-store" });
+  assert.equal(page.status, 200);
+  const html = await page.text();
+  assert.ok(html.includes("Buzzzz · Haptics studio"), "Studio HTML was not served");
+  const script = html.match(/<script[^>]*src="([^"]+)"/u)?.[1];
+  assert.ok(
+    typeof script === "string" && script.startsWith("/assets/"),
+    "Missing production JavaScript entry",
+  );
+  assert.match((await request(script)).headers.get("Content-Type") ?? "", /javascript/u);
+}
+
+for (let attempt = 0; ; attempt++) {
+  try {
+    await verifyStudioAssets();
+    break;
+  } catch (error) {
+    if (attempt === 5) throw error;
+    await delay(3000);
+  }
+}
 assert.match((await request("/favicon.svg")).headers.get("Content-Type") ?? "", /image\/svg/u);
 assert.equal(
   (await request("/deployment-check", { headers: { "Sec-Fetch-Mode": "navigate" } })).status,
