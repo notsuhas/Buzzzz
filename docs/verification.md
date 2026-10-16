@@ -13,6 +13,8 @@
 | `bun run analyze`      | Fallow dead-code and dependency-boundary analysis                                                                    |
 | `bun run test:browser` | Chromium layouts at 320–1920 px, persistence, media, timelines, light/dark axe scans, and hosted pairing/sharing/MCP |
 
+For an existing deployment, set `VITE_RELAY_URL` to the Studio origin and run `bun run --cwd apps/relay test:deployment`. This checks live asset/API routing, origin isolation, pairing, host/phone WebSockets, and private R2 reads, then deletes its temporary room. See [Cloudflare deployment](cloudflare.md).
+
 `bun run check` runs types, lint, formatting, unit and relay integration tests, build, and analysis. `bun run check:all` also runs browser tests.
 
 `analyze` fails on dead code or architecture violations. `bun run analyze:health` reports broader health and duplication findings for review without adding them to the quality gate.

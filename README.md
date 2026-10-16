@@ -72,7 +72,7 @@ The Vite relay is for development on a trusted LAN. It has no authentication, pa
 
 Rive uploads are limited to 20 MiB each. The relay keeps at most 10 files and 100 MiB in memory, then evicts older files. Restarting Studio clears them. Do not expose the development server to the internet.
 
-`bun run build` produces a static editor. A static deployment needs a separate relay for phone preview. Set `VITE_RELAY_URL` to your configured Cloudflare Worker origin when building Studio. The Worker uses token-isolated rooms, SQLite Durable Objects, and private R2 storage; pairing codes expire after ten minutes and rooms after 24 hours. See [relay setup](apps/relay/README.md). Deployment, remote pairing, and hardware playback require their own verification.
+`bun run build` produces a static editor. The [Cloudflare deployment](docs/cloudflare.md) serves Studio and its relay from one Worker and deploys after successful checks on `main`. Set `VITE_RELAY_URL` to the configured Worker origin when building Studio. The Worker uses token-isolated rooms, SQLite Durable Objects, and private R2 storage; pairing codes expire after ten minutes and rooms after 24 hours. See [relay setup](apps/relay/README.md). Deployment, remote pairing, and hardware playback require their own verification.
 
 ## Explainer video
 

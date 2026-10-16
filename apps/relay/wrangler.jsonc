@@ -27,4 +27,39 @@
       "simple": { "limit": 60, "period": 60 },
     },
   ],
+  "env": {
+    "production": {
+      "name": "buzzzz",
+      "workers_dev": false,
+      "preview_urls": false,
+      "routes": [
+        {
+          "pattern": "buzzzz.theclau.de",
+          "zone_id": "663406e8a79f8c4e84a87d60e999fc26",
+          "custom_domain": true,
+        },
+      ],
+      "assets": {
+        "directory": "../studio/dist",
+        "not_found_handling": "single-page-application",
+        "run_worker_first": ["/health", "/relay", "/v1/*"],
+      },
+      "vars": {
+        "STUDIO_ORIGINS": "",
+        "SESSION_TTL_SECONDS": "86400",
+        "PAIR_TTL_SECONDS": "600",
+      },
+      "durable_objects": {
+        "bindings": [{ "name": "ROOMS", "class_name": "RelayRoom" }],
+      },
+      "r2_buckets": [{ "binding": "ASSETS", "bucket_name": "buzzzz-production-assets" }],
+      "ratelimits": [
+        {
+          "name": "EDGE_RATE_LIMITER",
+          "namespace_id": "1001",
+          "simple": { "limit": 60, "period": 60 },
+        },
+      ],
+    },
+  },
 }

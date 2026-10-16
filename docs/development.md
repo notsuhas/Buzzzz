@@ -73,7 +73,7 @@ A portable export stores `manifest.json`, haptic JSON, and original media. Its p
 
 ## Hosted relay
 
-Run `bun run --cwd apps/relay dev` for the local Cloudflare runtime on port 8787. Installation generates the Worker's runtime types for the editor; rerun `bun run --cwd apps/relay typegen` after changing its configuration. Build Studio with `VITE_RELAY_URL` set to the relay origin. Before deploying, create the private R2 bucket and configure the Worker hostname and exact `STUDIO_ORIGINS` allowlist. `bun run --cwd apps/relay build` is a deployment dry run. It does not deploy. See [relay setup and API](../apps/relay/README.md).
+Run `bun run --cwd apps/relay dev` for the local Cloudflare runtime on port 8787. Installation generates the Worker's runtime types for the editor; rerun `bun run --cwd apps/relay typegen` after changing its configuration. Build Studio with `VITE_RELAY_URL` set to the relay origin. The [Cloudflare deployment guide](cloudflare.md) covers the production environment, GitHub settings, main-only deployment, and live smoke checks. `bun run --cwd apps/relay build` remains a deployment dry run. See [relay setup and API](../apps/relay/README.md).
 
 ## Dependency patches
 

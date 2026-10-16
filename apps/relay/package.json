@@ -10,6 +10,7 @@
     "typecheck": "bun run typegen && tsc --noEmit",
     "test": "bun run test:unit && bun run test:integration",
     "test:unit": "bun test __tests__",
+    "test:deployment": "bun __tests__/deployment.smoke.mts",
     "test:integration": "bun build src/index.ts --target browser --external cloudflare:workers --outfile .wrangler/test-worker.mjs && node --experimental-strip-types --test __tests__/*.integration.mts"
   },
   "dependencies": {

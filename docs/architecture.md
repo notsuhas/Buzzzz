@@ -41,7 +41,7 @@ The LAN relay is one unauthenticated development session. Any connected Studio c
 
 ## Hosted relay
 
-Studio builds with `VITE_RELAY_URL` to use a separate Cloudflare Worker. SQLite Durable Objects isolate rooms, token hashes, sockets, shares, and project revisions. Private R2 stores assets. Host and phone credentials determine roles; clients cannot choose a role with a query flag.
+Studio builds with `VITE_RELAY_URL` to use the Cloudflare relay. SQLite Durable Objects isolate rooms, token hashes, sockets, shares, and project revisions. Private R2 stores assets. Host and phone credentials determine roles; clients cannot choose a role with a query flag.
 
 Pairing uses `rivehaptics://pair`, a room ID, and a single-use code valid for ten minutes. Rooms, tokens, assets, and shares expire after 24 hours. Signed read URLs grant access to whoever holds them. Host-origin checks, rate limits, bounded uploads, and same-room asset checks apply independently of bearer authorization.
 
@@ -49,7 +49,7 @@ Project writes use revisions to reject stale updates. Share snapshots refresh wh
 
 Studio keeps its room and last agreed project revision in per-tab session storage for reload recovery. A Web Lock claims each room before reuse, so a duplicated tab creates its own room. Browsers without Web Locks always create a fresh room. Shared-link revocation credentials stay in local storage so a later tab can revoke links from closed sessions. Clearing this browser's site data removes those credentials; links still expire with their rooms.
 
-Static Studio hosting supplies no local relay. Configure and verify the separate Worker before using hosted pairing or sharing. A deployment dry run and Miniflare tests do not establish live availability.
+The production Cloudflare environment serves static Studio assets and relay endpoints on one origin. Its GitHub deployment job waits for main-branch checks, deploys both together, and verifies the live service. Standalone static hosting still needs a configured relay. See [Cloudflare deployment](cloudflare.md). A deployment dry run and Miniflare tests do not establish live availability.
 
 ## Native ownership
 

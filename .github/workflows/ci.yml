@@ -7,7 +7,7 @@ permissions:
   contents: read
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   quality:
     runs-on: ubuntu-24.04
@@ -61,3 +61,51 @@ jobs:
         working-directory: apps/preview
       - run: bunx expo export --platform ${{ matrix.platform }} --output-dir ../../.expo-export
         working-directory: apps/preview
+  deploy:
+    name: Deploy Cloudflare
+    needs: [quality, browser, preview]
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      vars.CLOUDFLARE_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: ${{ vars.CLOUDFLARE_STUDIO_ORIGIN }}
+    concurrency:
+      group: cloudflare-production
+      cancel-in-progress: false
+    env:
+      VITE_RELAY_URL: ${{ vars.CLOUDFLARE_STUDIO_ORIGIN }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version-file: package.json
+      - name: Validate production origin
+        run: |
+          bun -e '
+            const origin = process.env.VITE_RELAY_URL;
+            if (!origin || new URL(origin).origin !== origin || !origin.startsWith("https://")) {
+              throw new Error("Set CLOUDFLARE_STUDIO_ORIGIN to an HTTPS origin without a trailing slash");
+            }
+          '
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - name: Deploy Studio and relay
+        working-directory: apps/relay
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "Missing CLOUDFLARE_API_TOKEN secret" >&2; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "Missing CLOUDFLARE_ACCOUNT_ID variable" >&2; exit 1; }
+          bunx --no-install wrangler deploy --env production --var "STUDIO_ORIGINS:$VITE_RELAY_URL"
+      - name: Check deployed website and relay
+        run: |
+          curl --fail --silent --show-error --output /dev/null --connect-timeout 10 --max-time 30 --retry 5 --retry-all-errors --retry-delay 3 "$VITE_RELAY_URL/health"
+          bun run --cwd apps/relay test:deployment

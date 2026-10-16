@@ -13,7 +13,7 @@ bun run --cwd apps/relay build
 
 Use Node 22 or newer. Local development listens on port 8787 and emulates storage. `build` only prepares a deployment with `--dry-run`. `typecheck` regenerates ignored Cloudflare types, including the `Env` bindings. Integration tests use Node and Miniflare because Bun 1.4 cannot start workerd reliably inside its test runner.
 
-Before a real deployment, create the private R2 bucket named in `wrangler.jsonc`, set `STUDIO_ORIGINS` to the exact deployed Studio origins, and configure the Worker hostname. Keep the bucket private. An R2 lifecycle rule deleting objects after one day is a fallback for interrupted uploads. No remote resources or credentials are included here. The compatibility date matches the newest date supported by the pinned local runtime.
+The [production deployment](../../docs/cloudflare.md) serves Studio and the relay together, with a main-only GitHub Actions job and a live smoke check. Set the production origin and credentials as described there. Wrangler creates the private R2 bucket on first deployment if needed; keep public access disabled. An R2 lifecycle rule deleting objects after one day is a fallback for interrupted uploads. No credentials are included here. The compatibility date matches the newest date supported by the pinned local runtime.
 
 | Request                                              | Access and response                                                                                                  |
 | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
